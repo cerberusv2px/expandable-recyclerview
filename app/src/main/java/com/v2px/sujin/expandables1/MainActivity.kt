@@ -1,9 +1,19 @@
 package com.v2px.sujin.expandables1
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
+import android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_SWIPE
+import android.support.v7.widget.helper.ItemTouchHelper.LEFT
+import android.view.MotionEvent
+import android.widget.Toast
 import com.xwray.groupie.ExpandableGroup
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.Section
@@ -21,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     lateinit var groupAdapter: GroupAdapter<ViewHolder>
+    val swipeSection = Section()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             adapter = groupAdapter
         }
 
-      //  ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerMain)
+       // ItemTouchHelper(touchCallback).attachToRecyclerView(recyclerMain)
 
         getData().forEach {
             ExpandableGroup(it, false).apply {
@@ -42,12 +53,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /*private val touchCallback: SwipeTouchCallback by lazy {
+    private val touchCallback: SwipeTouchCallback by lazy {
         object : SwipeTouchCallback(gray) {
             private var swipeBack = false
             private var buttonShowState = ButtonState.GONE
-            private  val buttonWidth = 300f
+            private val buttonWidth = 300f
             private var buttonInstance: RectF? = null
+
+            override fun getMovementFlags(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?): Int {
+                return ItemTouchHelper.Callback.makeMovementFlags(0, LEFT)
+            }
 
             override fun onMove(recyclerView: RecyclerView,
                                 viewHolder: RecyclerView.ViewHolder,
@@ -71,10 +86,11 @@ class MainActivity : AppCompatActivity() {
 
             override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
                 if (actionState == ACTION_STATE_SWIPE) {
-                    setTouchListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    setTouchListener(c, recyclerMain, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    drawButton(c, viewHolder)
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                drawButton(c, viewHolder)
+                super.onChildDraw(c, recyclerMain, viewHolder, dX, dY, actionState, isCurrentlyActive)
+
             }
 
             private fun setTouchListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
@@ -84,7 +100,8 @@ class MainActivity : AppCompatActivity() {
                         if (dX > buttonWidth) buttonShowState = ButtonState.VISIBLE
 
                         if (buttonShowState != ButtonState.GONE) {
-                            setTouchDownListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                            setTouchDownListener(c, recyclerMain, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                            setItemsClickable(recyclerMain, false)
                         }
                     }
                     false
@@ -94,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             private fun setTouchDownListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
                 recyclerMain.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
-                        setTouchUpListener(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        setTouchUpListener(c, recyclerMain, viewHolder, dX, dY, actionState, isCurrentlyActive)
                     }
                     false
                 }
@@ -103,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             private fun setTouchUpListener(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
                 recyclerMain.setOnTouchListener { v, event ->
                     if (event.action == MotionEvent.ACTION_UP) {
-                        touchCallback.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        super.onChildDraw(c, recyclerMain, viewHolder, 0f, dY, actionState, isCurrentlyActive)
                         recyclerMain.setOnTouchListener { v, event ->
                             false
                         }
@@ -116,8 +133,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             private fun setItemsClickable(recyclerView: RecyclerView, isClickable: Boolean) {
-                for (i in 0..recyclerView.childCount) {
-                    recyclerView.getChildAt(i).isClickable = isClickable
+                for (i in 0..recyclerMain.childCount) {
+                    recyclerMain.getChildAt(i).isClickable = isClickable
                 }
             }
 
@@ -133,7 +150,7 @@ class MainActivity : AppCompatActivity() {
                 c.drawRoundRect(rightButton, corner, corner, p)
                 drawText("DELETE", c, rightButton, p)
                 buttonInstance = null
-                if(buttonShowState == ButtonState.VISIBLE) {
+                if (buttonShowState == ButtonState.VISIBLE) {
                     buttonInstance = rightButton
                 }
 
@@ -146,10 +163,10 @@ class MainActivity : AppCompatActivity() {
                 p.textSize = textSize
 
                 val textWidth = p.measureText(text)
-                c.drawText(text, button.centerX() - (textWidth/2), button.centerY()+(textWidth/2), p)
+                c.drawText(text, button.centerX() - (textWidth / 2), button.centerY() + (textWidth / 2), p)
             }
         }
-    }*/
+    }
 
     private fun getData(): List<ParentItem> {
         return listOf(

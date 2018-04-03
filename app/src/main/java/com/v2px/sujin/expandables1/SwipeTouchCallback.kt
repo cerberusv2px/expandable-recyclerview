@@ -20,7 +20,9 @@ abstract class SwipeTouchCallback(@param:ColorInt @field:ColorInt private val ba
         if (ItemTouchHelper.ACTION_STATE_SWIPE == actionState) {
             val child = viewHolder.itemView
             val lm = recyclerView.layoutManager
-
+            /*if (recyclerView.adapter is GroupAdapter) {
+                val adapter: GroupAdapter<ViewHolder> = recyclerView.adapter
+            }*/
             // Fade out the item
            // child.alpha = 1 - Math.abs(dX) / child.width as Float
 
